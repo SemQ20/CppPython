@@ -13,7 +13,8 @@
             "cppStandard": "c++17",
             "intelliSenseMode": "msvc-x64",
             "includePath": [
-                "C:\\Python38\\include"
+                "C:\\Python38\\include",
+                "/usr/include/python3.8"
             ]
         }
     ],

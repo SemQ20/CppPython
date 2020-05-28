@@ -1,5 +1,12 @@
 #define PY_SSIZE_T_CLEAN
+#include <iostream>
+/* for linux need install python dev */
+#include <python3.8/Python.h>
+
+#if defined (_WIN32)
 #include <Python.h>
+#endif 
+
 
 int
 main(int argc, char *argv[])
