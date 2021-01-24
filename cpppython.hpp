@@ -2,18 +2,30 @@
 #define CPPPYTHON
 
 #include <iostream>
-#include <deque>
+#include <any>
+#include <vector>
+#include <string>
+#include <typeinfo>
 
 #define PY_SSIZE_T_CLEAN
 #include <python3.8/Python.h>
 
-#if defined (_WIN32)
-#include <Python.h>
-#endif 
+template<typename T>
+void func2(std::vector<std::pair<const char*, std::any>>& v, T arg){
+    v.push_back({typeid(decltype(arg)).name(), arg});
+}
+
+template<typename T, typename ... Args>
+void func1(std::vector<std::pair<const char*, std::any>>& v, T t, Args... args){
+    func2(v, t);
+    if constexpr(sizeof...(args) != 0){
+        func1(v, args...);
+    }
+}
 
 template<typename T, typename... Ts>
 int call_python_function(T py_module_name, T py_function_name,Ts... arguments){
-    std::deque<Ts...> cont{arguments...};
+    std::vector<std::pair<const char*, std::any>> args;
     PyObject *pName, *pModule, *pFunc;
     PyObject *pArgs, *pValue;
     int nParams = sizeof...(arguments);
@@ -30,11 +42,9 @@ int call_python_function(T py_module_name, T py_function_name,Ts... arguments){
         /* pFunc is a new reference */
 
         if (pFunc && PyCallable_Check(pFunc)) {
-            pArgs = PyTuple_New(sizeof...(arguments));
-            for(int i = 0; i <= cont.size(); ++i){
-                pValue = PyLong_FromLong(cont.front());
-                cont.pop();
-
+            pArgs = PyTuple_New(nParams);
+            for(int i = 0; i <= nParams; ++i){
+                pValue = PyLong_FromLong(4); // ??
                 if (!pValue) {
                     Py_DECREF(pArgs);
                     Py_DECREF(pModule);
@@ -42,7 +52,7 @@ int call_python_function(T py_module_name, T py_function_name,Ts... arguments){
                     return 1;
                 }
                 /* pValue reference stolen here: */
-                PyTuple_SetItem(pArgs, nParams, pValue);
+                PyTuple_SetItem(pArgs, i, pValue);
             }
             pValue = PyObject_CallObject(pFunc, pArgs);
             Py_DECREF(pArgs);
