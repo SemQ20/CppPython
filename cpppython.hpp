@@ -23,7 +23,7 @@ void func1(std::vector<std::pair<const char*, std::any>>& v, T t, Args... args){
     }
 }
 
-PyObject* get_Values_For_Function_Call(std::vector<std::pair<const char*, std::any>> &vec, size_t iteration,size_t num_params){
+PyObject* get_Values_For_Function_Call(std::vector<std::pair<const char*, std::any>> vec, int iteration, int num_params){
     PyObject *obj;
     if(iteration <= num_params){
         if(vec[iteration].first == typeid(const char*).name()){
@@ -45,49 +45,49 @@ PyObject* get_Values_For_Function_Call(std::vector<std::pair<const char*, std::a
 }
 
 template<typename T, typename... Ts>
-int call_python_function(T py_module_name, T py_function_name,Ts... arguments){
+const char* call_python_function(T py_module_name, T py_function_name,Ts... arguments){
     std::vector<std::pair<const char*, std::any>> args;
     PyObject *pName, *pModule, *pFunc;
     PyObject *pArgs, *pValue;
-    int nParams = sizeof...(arguments);
-
+    int nParams = sizeof...(arguments) - 1;
     Py_Initialize();
     pName = PyUnicode_DecodeFSDefault(py_module_name);
     /* Error checking of pName left out */
-
+    func1(args,arguments...);
     pModule = PyImport_Import(pName);
     Py_DECREF(pName);
 
     if (pModule != NULL) {
         pFunc = PyObject_GetAttrString(pModule, py_function_name);
         /* pFunc is a new reference */
-
         if (pFunc && PyCallable_Check(pFunc)) {
-            pArgs = PyTuple_New(nParams);
-            for(int i = 0; i <= nParams; ++i){
+            pArgs = PyTuple_New(nParams + 1);
+            for(int i = 0; i <= nParams; i++){
                 pValue = get_Values_For_Function_Call(args, i, nParams);
                 if (!pValue) {
                     Py_DECREF(pArgs);
                     Py_DECREF(pModule);
                     std::cout << "Cannot convert argument\n";
-                    return 1;
+                    return "1";
                 }
                 /* pValue reference stolen here: */
                 PyTuple_SetItem(pArgs, i, pValue);
             }
+
             pValue = PyObject_CallObject(pFunc, pArgs);
             Py_DECREF(pArgs);
             if (pValue != NULL) {
                 //std::cout << "Result of call: " << PyLong_AsLong(pValue) << '\n';
                 Py_DECREF(pValue);
-                return PyLong_AsLong(pValue);
+                
+                return PyUnicode_AS_DATA(pValue); // ?????????
             }
             else {
                 Py_DECREF(pFunc);
                 Py_DECREF(pModule);
                 PyErr_Print();
                 std::cout << "Call failed\n";
-                return 1;
+                return "1";
             }
         }
         else {
@@ -101,10 +101,10 @@ int call_python_function(T py_module_name, T py_function_name,Ts... arguments){
     else {
         PyErr_Print();
         std::cout << "Failed to load: " <<  py_module_name << '\n';
-        return 1;
+        return "1";
     }
     if (Py_FinalizeEx() < 0) {
-        return 120;
+        return "120";
     }
     return 0;
 }
