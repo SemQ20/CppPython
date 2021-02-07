@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 add_executable(${TARGET} main.cpp)
 
-if(UNIX)
+
 find_package(Python COMPONENTS Interpreter Development)
 target_link_libraries(${TARGET} PRIVATE ${Python_LIBRARIES})
-endif(UNIX)
