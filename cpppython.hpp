@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <typeinfo>
+#include <cmath>
 
 #define PY_SSIZE_T_CLEAN
 #include <python3.8/Python.h>
@@ -37,6 +38,7 @@ PyObject* get_Values_For_Function_Call(std::vector<std::pair<const char*, std::a
         }
         if(vec[iteration].first == typeid(double).name()){
             obj = PyFloat_FromDouble(std::any_cast<double>(vec[iteration].second));
+            
         }
     }else{
         return obj = nullptr;
@@ -44,8 +46,9 @@ PyObject* get_Values_For_Function_Call(std::vector<std::pair<const char*, std::a
     return obj;
 }
 
+//type deduction problem
 template<typename T, typename... Ts>
-const char* call_python_function(T py_module_name, T py_function_name,Ts... arguments){
+float call_python_function(T py_module_name, T py_function_name,Ts... arguments){
     std::vector<std::pair<const char*, std::any>> args;
     PyObject *pName, *pModule, *pFunc;
     PyObject *pArgs, *pValue;
@@ -68,26 +71,24 @@ const char* call_python_function(T py_module_name, T py_function_name,Ts... argu
                     Py_DECREF(pArgs);
                     Py_DECREF(pModule);
                     std::cout << "Cannot convert argument\n";
-                    return "1";
+                    return 1;
                 }
                 /* pValue reference stolen here: */
                 PyTuple_SetItem(pArgs, i, pValue);
             }
-
             pValue = PyObject_CallObject(pFunc, pArgs);
             Py_DECREF(pArgs);
             if (pValue != NULL) {
                 //std::cout << "Result of call: " << PyLong_AsLong(pValue) << '\n';
                 Py_DECREF(pValue);
-                
-                return PyUnicode_AS_DATA(pValue); // ?????????
+                return PyFloat_AS_DOUBLE(pValue); // ?????????
             }
             else {
                 Py_DECREF(pFunc);
                 Py_DECREF(pModule);
                 PyErr_Print();
                 std::cout << "Call failed\n";
-                return "1";
+                return 1;
             }
         }
         else {
@@ -101,10 +102,10 @@ const char* call_python_function(T py_module_name, T py_function_name,Ts... argu
     else {
         PyErr_Print();
         std::cout << "Failed to load: " <<  py_module_name << '\n';
-        return "1";
+        return 1;
     }
     if (Py_FinalizeEx() < 0) {
-        return "120";
+        return 120;
     }
     return 0;
 }
