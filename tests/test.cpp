@@ -7,5 +7,6 @@
 
 
 BOOST_AUTO_TEST_CASE(substract_Test){
-    BOOST_CHECK(std::round(call_python_function("test_python", "sum" ,3.1, 4.3, 1.3)) == std::round(8.7));
+    std::string s = call_python_function("test_python", "sum" ,"sddsa", "asek", "asdiqw");
+    BOOST_CHECK(s == "sddsaasekasdiqw");
 }
