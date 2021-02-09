@@ -4,7 +4,8 @@
 
 int main()
 {
-    //int result = call_python_function("test_python", "sum", 4, 3, 5);
-    std::cout << call_python_function("test_python", "sum" ,"sddsa", "asek", "asdiqw") << '\n';
+    //CppInstance pyinstance;
+    std::cout << call_python_function("test_python", "sum", "sda", "sadkm", "asdkq") << '\n';
+    std::cout << "hello" << '\n';
     return 0;
 }

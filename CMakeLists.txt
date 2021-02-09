@@ -6,7 +6,7 @@ set(TARGET CppPython)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
-add_executable(${TARGET} main.cpp)
+add_executable(${TARGET} main.cpp cpppython.cpp)
 
 
 find_package(Python COMPONENTS Interpreter Development)
